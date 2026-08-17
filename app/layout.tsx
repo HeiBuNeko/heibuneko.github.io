@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Noto_Sans_SC } from "next/font/google";
+import { Providers } from "./providers";
 import "./globals.css";
 
 const notoSansSC = Noto_Sans_SC({
@@ -14,8 +15,14 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${notoSansSC.variable} h-full antialiased`}>
-      <body className="flex h-full flex-col">{children}</body>
+    <html
+      lang="en"
+      className={`${notoSansSC.variable} antialiased`}
+      suppressHydrationWarning
+    >
+      <body className="bg-background text-foreground">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
