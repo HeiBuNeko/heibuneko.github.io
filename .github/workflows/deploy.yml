@@ -94,19 +94,14 @@ jobs:
           mkdir -p out
           tar -xf artifact.tar -C out
 
-      - name: Deploy to Ubuntu
-        env:
-          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
-          SSH_HOST: ${{ secrets.SSH_HOST }}
-          SSH_PORT: ${{ secrets.SSH_PORT }}
-          SSH_USER: ${{ secrets.SSH_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -p "${SSH_PORT:-22}" -H "$SSH_HOST" >> ~/.ssh/known_hosts
-          rsync -avz --delete \
-            -e "ssh -i ~/.ssh/deploy_key -p ${SSH_PORT:-22} -o StrictHostKeyChecking=yes" \
-            out/ "$SSH_USER@$SSH_HOST:$DEPLOY_PATH"
+      - name: rsync deployments
+        uses: burnett01/rsync-deployments@v9
+        with:
+          switches: -avzr --delete --rsync-path="sudo rsync"
+          path: out/
+          remote_path: ${{ secrets.REMOTE_PATH }}
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_port: ${{ secrets.REMOTE_PORT }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.REMOTE_PRIVATE_KEY }}
+          strict_hostkeys_checking: "true"
